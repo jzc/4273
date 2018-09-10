@@ -8,9 +8,31 @@
 #include <sys/socket.h> 
 #include <arpa/inet.h> 
 #include <netinet/in.h> 
+#include <dirent.h>
   
 #define PORT     8080 
 #define MAXLINE 1024 
+
+void ls(char *buffer) {
+    DIR *dir = opendir(".");
+    if (dir == NULL) {
+        perror("opendir error");
+        exit(EXIT_FAILURE);
+    }
+    FILE *buffer_stream = fmemopen(buffer, MAXLINE, "w");
+    if (buffer_stream == NULL) {
+        perror("fmemopen error");
+        exit(EXIT_FAILURE);
+    }
+    struct dirent *entry;
+    while ((entry = readdir(dir)) != NULL) {
+        if (entry->d_type == DT_REG) {
+            fprintf(buffer_stream, "%s\n", entry->d_name);
+        }
+    }
+    fclose(buffer_stream);
+    closedir(dir);
+}
 
 int main() { 
     int sockfd; 
@@ -52,7 +74,7 @@ int main() {
         } else if (strncmp("delete", recv_buffer, 6) == 0) {
             sprintf(send_buffer, "delete recieved\n");
         } else if (strncmp("ls", recv_buffer, 2) == 0) {
-            sprintf(send_buffer, "ls recieved\n");
+            ls(send_buffer);
         } else if (strncmp("exit", recv_buffer, 4) == 0) {
             sprintf(send_buffer, "exit recieved\n");
         } else {
