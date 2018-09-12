@@ -7,6 +7,8 @@
 #include <arpa/inet.h> 
 #include <netinet/in.h> 
 #include <dirent.h>
+
+#include "file_transfer.h"
   
 #define PORT     8080 
 #define MAXLINE 1024 
@@ -37,7 +39,6 @@ int main() {
     char recv_buffer[MAXLINE], send_buffer[MAXLINE]; 
     struct sockaddr_in servaddr, cliaddr; 
       
-    // Creating socket file descriptor 
     if ((sockfd = socket(AF_INET, SOCK_DGRAM, 0)) < 0 ) { 
         perror("socket creation failed"); 
         exit(EXIT_FAILURE); 
@@ -45,20 +46,16 @@ int main() {
       
     memset(&servaddr, 0, sizeof(servaddr)); 
     memset(&cliaddr, 0, sizeof(cliaddr)); 
-      
-    // Filling server information 
-    servaddr.sin_family = AF_INET; // IPv4 
+    servaddr.sin_family = AF_INET; 
     servaddr.sin_addr.s_addr = INADDR_ANY; 
     servaddr.sin_port = htons(PORT); 
       
-    // Bind the socket with the server address 
     if (bind(sockfd, (const struct sockaddr *)&servaddr, sizeof(servaddr)) < 0 ) 
     { 
         perror("bind failed"); 
         exit(EXIT_FAILURE); 
     } 
       
-
     int n;
     // This has to be initialized or cliaddr wont be filled out in recvfrom
     socklen_t clilen = sizeof cliaddr; 
@@ -80,17 +77,19 @@ int main() {
             ls(send_buffer);
         } else if (strncmp("exit", recv_buffer, 4) == 0) {
             break;
+        } else if (strncmp("test", recv_buffer, 4) == 0) {
+            send_with_ack(sockfd, "test string", sizeof "test string", (struct sockaddr *)&cliaddr, clilen);
         } else {
             sprintf(send_buffer, "unknown command\n");
         }
 
-        printf("sending: %s", send_buffer);
-        n = sendto(sockfd, (const char *)send_buffer, strlen(send_buffer), 0,
-                   (const struct sockaddr *) &cliaddr, clilen); 
-        if (n < 0) {
-            perror("sendto error");
-        }
-        printf("message sent.\n");  
+        // printf("sending: %s", send_buffer);
+        // n = sendto(sockfd, (const char *)send_buffer, strlen(send_buffer), 0,
+        //            (const struct sockaddr *) &cliaddr, clilen); 
+        // if (n < 0) {
+        //     perror("sendto error");
+        // }
+        // printf("message sent.\n");  
     }
     
     close(sockfd);
