@@ -1,5 +1,3 @@
-
-// Client side implementation of UDP client-server model 
 #include <stdio.h> 
 #include <stdlib.h> 
 #include <unistd.h> 
@@ -19,6 +17,7 @@ int main(int argc, char *argv[]) {
     struct sockaddr_in servaddr; 
   
     // Creating socket file descriptor 
+    
     if ((sockfd = socket(AF_INET, SOCK_DGRAM, 0)) < 0 ) { 
         perror("socket creation failed"); 
         exit(EXIT_FAILURE); 
@@ -31,19 +30,24 @@ int main(int argc, char *argv[]) {
     servaddr.sin_port = htons(PORT); 
     servaddr.sin_addr.s_addr = INADDR_ANY; 
       
-    unsigned int n, len; 
+    int n;
+    socklen_t servlen = sizeof servaddr;
     
     while (1) {
+        printf("> ");
         fgets(send_buffer, MAXLINE, stdin);
-        sendto(sockfd, (const char *) send_buffer, strlen(send_buffer), 
-            MSG_CONFIRM, (const struct sockaddr *) &servaddr,  
-                sizeof(servaddr)); 
+        n = sendto(sockfd, (const char *) send_buffer, strlen(send_buffer), 0,
+                   (const struct sockaddr *) &servaddr, servlen); 
+        if (n < 0) {
+            perror("sendto error");
+        }
             
-        n = recvfrom(sockfd, (char *)recv_buffer, MAXLINE,  
-                    MSG_WAITALL, (struct sockaddr *) &servaddr, 
-                    &len); 
-        recv_buffer[n] = '\0'; 
-        printf("Server : %s", recv_buffer); 
+        n = recvfrom(sockfd, (char *)recv_buffer, MAXLINE, 0,
+                     (struct sockaddr *) &servaddr, &servlen); 
+        if (n < 0) {
+            perror("recvfrom error");
+        }
+        printf("Server: %s", recv_buffer); 
     }
   
     close(sockfd); 

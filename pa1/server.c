@@ -1,5 +1,3 @@
-
-// Server side implementation of UDP client-server model 
 #include <stdio.h> 
 #include <stdlib.h> 
 #include <unistd.h> 
@@ -60,11 +58,16 @@ int main() {
         exit(EXIT_FAILURE); 
     } 
       
+
+    int n;
+    // This has to be initialized or cliaddr wont be filled out in recvfrom
+    socklen_t clilen = sizeof cliaddr; 
     while (1) {
-        unsigned int len, n; 
-        n = recvfrom(sockfd, (char *)recv_buffer, MAXLINE,  MSG_WAITALL,
-                    (struct sockaddr *) &cliaddr, &len); 
-        recv_buffer[n] = '\0'; 
+        n = recvfrom(sockfd, recv_buffer, sizeof recv_buffer, 0,
+                     (struct sockaddr *) &cliaddr, &clilen); 
+        if (n < 0) {
+            perror("recvfrom error");
+        }
 
         printf("Client : %s", recv_buffer); 
         if (strncmp("get", recv_buffer, 3) == 0) {
@@ -76,17 +79,19 @@ int main() {
         } else if (strncmp("ls", recv_buffer, 2) == 0) {
             ls(send_buffer);
         } else if (strncmp("exit", recv_buffer, 4) == 0) {
-            sprintf(send_buffer, "exit recieved\n");
+            break;
         } else {
             sprintf(send_buffer, "unknown command\n");
         }
 
         printf("sending: %s", send_buffer);
-        sendto(sockfd, (const char *)send_buffer, strlen(send_buffer),  
-            MSG_CONFIRM, (const struct sockaddr *) &cliaddr, 
-                len); 
+        n = sendto(sockfd, (const char *)send_buffer, strlen(send_buffer), 0,
+                   (const struct sockaddr *) &cliaddr, clilen); 
+        if (n < 0) {
+            perror("sendto error");
+        }
         printf("message sent.\n");  
     }
-      
-    return 0; 
-} 
+    
+    close(sockfd);
+}
