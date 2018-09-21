@@ -1,0 +1,124 @@
+\documentclass{article}
+\usepackage{geometry}
+\usepackage{amsmath}
+
+\title{Problem Set \#1}
+\author{Justin Cai}
+\begin{document}
+    \maketitle
+    \begin{enumerate}
+        \item Circuit switching has a dedicated connection to the between nodes, 
+        which means that the two nodes can utilize the full bandwidth of that link,
+         compared to packet-switching, in which the two nodes might have to share the
+          bandwidth with other nodes. 
+
+        \item With TDM, you can use the whole bandwidth for a certain quanta but with FDM
+        you won't be able to use all of the bandwidth.
+
+        \item 
+        \begin{enumerate}
+            \item $d_{\text{prop}} = m/s$
+            \item $d_{\text{trans}} = L/R$
+            \item $d_{\text{end-to-end}} = d_{\text{prop}} + d_{\text{trans}}$
+            \item $d_{\text{trans}}$ is the time it takes to put all the bits into
+            the link. This means that the first bit will be put into the link at 
+            $t=0$ and the last bit at $t=d_{\text{trans}}$. So, the last bit will
+            be $0$ m from host A.
+            \item The first bit was sent out at $t=0$, so it has been 
+            travelling for $d_\text{trans}$ seconds. Multiply that by the 
+            speed of the medium to get $s \cdot d_\text{trans}$.
+            \item If $d_\text{prop}$ is less than $d_\text{trans}$, that means it takes
+            less time for the physical bit to travel from host A to host B than it 
+            takes to put all the bits into the link. Since this is the case, the first bit
+            of the packet should have already arrived.
+            \item 
+            \begin{align*}
+                d_\text{prop} &= d_\text{trans}\\
+                \frac{m}{s} &= \frac{L}{R}\\
+                m &= \frac{Ls}{R} \approx \boxed{535.7 \text{ km}}
+            \end{align*}
+        \end{enumerate}
+        
+        \item The total time elapsed is equal to
+         $\text{creation time} + \text{end-to-end delay} = 
+         \text{creation time} + d_\text{prop} + d_\text{trans}$. 
+        \[
+            \frac{56 \text{ bytes} \cdot 8 \text{ bits/byte}}{65000 \text{ bits/s}}+
+            \frac{56 \text{ bytes} \cdot 8 \text{ bits/byte}}{10^6 \text{ bits/s}} + 20 \text{ ms} \approx \boxed{27.3 \text{ ms}}
+        \]
+        
+        \item
+        \begin{enumerate}
+            \item There can be $15 \text{ Mbps} / 150 \text{ Kbps} = \boxed{100}$ users 
+            supported when circuit switching is used.
+            \item Since each users is only transmitting 10\% of the time, the 
+            probability that a given user is transmitting is $\boxed{.1}$.
+            \item The probability that exactly half of the 20 users are transmitting simultaneously,
+            where $X \sim \text{Binomial}(20, 0.1)$, is $P(X=10) = \binom{20}{10} (0.1)^{10}(1-0.1)^{20-10} = \boxed{0.00000644}$.
+        \end{enumerate}
+
+        \item
+        \begin{enumerate}
+            \item The minimum RTT is $385000 \text{ km} \cdot 3\times 10^8 \text{ m/s}\cdot2 \approx \boxed{2.6 \text{ s}}$.
+            \item $2.6 \text{ s} \cdot 1 \text{ gigabit/s} = 2.6 \text{ gigabits} = \boxed{325 \text{ MB}}$.
+            \item The bandwidth delay product would be the number of bits you can send
+            before you can receive a response.
+        \end{enumerate}
+
+        \item
+        \begin{enumerate}
+            \item 
+            \begin{align*}
+                \text{Throughput} &= \text{TransferSize}/\text{TransferTime}\\
+                \text{TransferSize} &= 2 \text{ MB} \\
+                \text{TransferTime} &= \text{RTT} + \frac{\text{TransferSize}}{\text{Bandwidth}} = 0.316 \text{ s}\\
+                \text{Throughput} &= \boxed{50.63 \text{ Mbps}}
+            \end{align*}
+            \item Assuming one-way delay = RTT/2,
+            \begin{align*}
+                \text{Throughput} &= \text{TransferSize}/\text{TransferTime}\\
+                \text{TransferSize} &= 2 \text{ MB} \\
+                \text{TransferTime} &= \text{one-way delay} + \frac{\text{TransferSize}}{\text{Bandwidth}} = 0.166 \text{ s}\\
+                \text{Throughput} &= \boxed{96.4 \text{ Mbps}}
+            \end{align*}
+        \end{enumerate}
+
+        \item $1/(10*10^9 \text{ bits/s}) \cdot 2.5 \times 10^8 \text{ m/s} = \boxed{.023 \text{ m/bit}}$
+
+        \item 
+        \begin{enumerate}
+            \item $1 \text{ Gbps} \cdot 20000 \text{ km} / 2.5 \times 10^8 \text{ m/s} = 80 \text{ Mb} = \boxed{10 \text{ MB}}$
+            \item When sending the one file, the maximum number of bits in the link will be
+            the whole file size (800000 bits). The last bit will be transmitted at 80 $\mu s$, so the first bit will be 
+            200 km through the link, and so the whole file will be in the link.
+            \item Each packet will be recieved after
+            \begin{align*}
+                \frac{40000 \text{ bits}}{10^9 \text{ bits/s}} + \frac{20000 \text{ km}}{2.5 \times 10^8 \text{ m/s}} =  80.04 \text{ ms}
+            \end{align*}
+            Then, host B will need to send an acknowledgement, which will take another
+            \begin{align*}
+                \frac{20000 \text{ km}}{2.5 \times 10^8 \text{ m/s}} = 80 \text{ ms}
+            \end{align*}
+            Finally, for all the packets, it will take
+            \begin{align*}
+                20*(80.04 \text{ ms} + 80 \text{ ms}) = \boxed{3.2 \text{ s}}
+            \end{align*}
+
+        \end{enumerate}
+
+        \newpage
+        \item 
+        \begin{enumerate}
+            \item $36000 \text{ km} / 2.4 \times 10^8 \text{ m/s}  = \boxed{0.15 \text{ s}}$
+            \item $10 \text{ Mbps} \cdot 0.15 \text{ s} = 1.5 \text{ Mb} = \boxed{187.5 \text{ KB}}$
+            \item Since it sends a photo every minute, the transmission time of each photo 
+            should be 60 s for it to be continuously transmitting. 
+            \begin{align*}
+                \text{TransmissionTime} &= \frac{x}{\text{Bandwidth}}\\
+                x &= \text{TransmissionTime} \cdot \text{Bandwidth} \approx \boxed{75 \text{ MB}}
+            \end{align*}
+            \item The maximum number of bits that can be in the link at any given time is 
+            simply the bandwidth delay product, which is 
+        \end{enumerate}
+    \end{enumerate}
+\end{document}
