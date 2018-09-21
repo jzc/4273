@@ -9,7 +9,6 @@
 #include <dirent.h>
 
 #include "file_transfer.h"
-  
 #include "defs.h"
 
 void do_ls(char *buffer, int sockfd, struct sockaddr *cliaddr, socklen_t clilen) {
@@ -39,17 +38,31 @@ void do_ls(char *buffer, int sockfd, struct sockaddr *cliaddr, socklen_t clilen)
 void dispatch(char *message, int sockfd, struct sockaddr *cliaddr, socklen_t clilen) {
     char send_buffer[MAXLINE];
     if (!strncmp(message, GET, strlen(GET))) {
-    
+        printf("get received\n");
     } else if (!strncmp(message, PUT, strlen(PUT))) {
-
+        printf("put received\n");
     } else if (!strncmp(message, DELETE, strlen(DELETE))) {
+        printf("delete received\n");
+        message += strlen(DELETE) + 1;
+        char* pos;
+        if ((pos = strchr(message, '\n')) != NULL) 
+            *pos = '\0';
 
+        if (remove(message) < 0) {
+            sprintf(send_buffer, "Failed to remove file '%s'\n", message);
+        } else {
+            sprintf(send_buffer, "Successfully removed filed '%s'\n", message);
+        }
+        send_with_ack(sockfd, send_buffer, strlen(send_buffer)+1, cliaddr, clilen);
     } else if (!strncmp(message, LS, strlen(LS))) {
-        printf("LS received\n");
+        printf("ls received\n");
         do_ls(send_buffer, sockfd, cliaddr, clilen);
     } else if (!strncmp(message, EXIT, strlen(EXIT))) {
+        printf("exit received\n");
         exit(0);
-    } 
+    } else {
+        printf("unknown command received\n");
+    }
 }
 
 int main() { 

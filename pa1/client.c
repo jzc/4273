@@ -12,7 +12,7 @@
 // #define PORT     8080 
 // #define MAXLINE 1024
 #include "defs.h" 
-  
+
 void dispatch(char *message, int sockfd, struct sockaddr *servaddr, socklen_t servlen) {
     char recv_buffer[MAXLINE];
     if (!strncmp(message, GET, strlen(GET))) {
@@ -20,17 +20,21 @@ void dispatch(char *message, int sockfd, struct sockaddr *servaddr, socklen_t se
     } else if (!strncmp(message, PUT, strlen(PUT))) {
 
     } else if (!strncmp(message, DELETE, strlen(DELETE))) {
-
+        if (recv_with_ack(sockfd, recv_buffer, sizeof recv_buffer, servaddr, &servlen) < 0) {
+            printf("timed out");
+            return;
+        }
+        printf("%s", recv_buffer);
     } else if (!strncmp(message, LS, strlen(LS))) {
         if (recv_with_ack(sockfd, recv_buffer, sizeof recv_buffer, servaddr, &servlen) < 0) {
             printf("timed out");
             return;
         }
-        puts(recv_buffer);
+        printf("%s", recv_buffer);
     } else if (!strncmp(message, EXIT, strlen(EXIT))) {
         exit(0);
     } else {
-        printf("Invalid command");
+        printf("Invalid command\n");
     }
 }
 
@@ -51,7 +55,6 @@ int main(int argc, char *argv[]) {
       
     int n;
     socklen_t servlen = sizeof servaddr;
-    
     while (1) {
         printf("> ");
         fgets(send_buffer, MAXLINE, stdin);
