@@ -10,10 +10,9 @@
 
 #include "file_transfer.h"
   
-#define PORT     8080 
-#define MAXLINE 1024 
+#include "defs.h"
 
-void ls(char *buffer) {
+void do_ls(char *buffer, int sockfd, struct sockaddr *cliaddr, socklen_t clilen) {
     DIR *dir = opendir(".");
     if (dir == NULL) {
         perror("opendir error");
@@ -32,11 +31,30 @@ void ls(char *buffer) {
     }
     fclose(buffer_stream);
     closedir(dir);
+    if (send_with_ack(sockfd, buffer, strlen(buffer)+1, cliaddr, clilen) < 0) {
+        printf("LS failed\n");
+    }
+}
+
+void dispatch(char *message, int sockfd, struct sockaddr *cliaddr, socklen_t clilen) {
+    char send_buffer[MAXLINE];
+    if (!strncmp(message, GET, strlen(GET))) {
+    
+    } else if (!strncmp(message, PUT, strlen(PUT))) {
+
+    } else if (!strncmp(message, DELETE, strlen(DELETE))) {
+
+    } else if (!strncmp(message, LS, strlen(LS))) {
+        printf("LS received\n");
+        do_ls(send_buffer, sockfd, cliaddr, clilen);
+    } else if (!strncmp(message, EXIT, strlen(EXIT))) {
+        exit(0);
+    } 
 }
 
 int main() { 
     int sockfd; 
-    char recv_buffer[MAXLINE], send_buffer[MAXLINE]; 
+    char recv_buffer[MAXLINE]; //, send_buffer[MAXLINE]; 
     struct sockaddr_in servaddr, cliaddr; 
       
     if ((sockfd = socket(AF_INET, SOCK_DGRAM, 0)) < 0 ) { 
@@ -65,31 +83,9 @@ int main() {
         if (n < 0) {
             perror("recvfrom error");
         }
+        recv_buffer[n] = '\0';
 
-        printf("Client : %s", recv_buffer); 
-        if (strncmp("get", recv_buffer, 3) == 0) {
-            sprintf(send_buffer, "get recieved\n");
-        } else if (strncmp("put", recv_buffer, 3) == 0) {
-            sprintf(send_buffer, "put recieved\n");
-        } else if (strncmp("delete", recv_buffer, 6) == 0) {
-            sprintf(send_buffer, "delete recieved\n");
-        } else if (strncmp("ls", recv_buffer, 2) == 0) {
-            ls(send_buffer);
-        } else if (strncmp("exit", recv_buffer, 4) == 0) {
-            break;
-        } else if (strncmp("test", recv_buffer, 4) == 0) {
-            send_with_ack(sockfd, "test string", sizeof "test string", (struct sockaddr *)&cliaddr, clilen);
-        } else {
-            sprintf(send_buffer, "unknown command\n");
-        }
-
-        // printf("sending: %s", send_buffer);
-        // n = sendto(sockfd, (const char *)send_buffer, strlen(send_buffer), 0,
-        //            (const struct sockaddr *) &cliaddr, clilen); 
-        // if (n < 0) {
-        //     perror("sendto error");
-        // }
-        // printf("message sent.\n");  
+        dispatch(recv_buffer, sockfd, (struct sockaddr *) &cliaddr, clilen);
     }
     
     close(sockfd);

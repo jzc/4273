@@ -9,9 +9,31 @@
 
 #include "file_transfer.h"
   
-#define PORT     8080 
-#define MAXLINE 1024 
+// #define PORT     8080 
+// #define MAXLINE 1024
+#include "defs.h" 
   
+void dispatch(char *message, int sockfd, struct sockaddr *servaddr, socklen_t servlen) {
+    char recv_buffer[MAXLINE];
+    if (!strncmp(message, GET, strlen(GET))) {
+    
+    } else if (!strncmp(message, PUT, strlen(PUT))) {
+
+    } else if (!strncmp(message, DELETE, strlen(DELETE))) {
+
+    } else if (!strncmp(message, LS, strlen(LS))) {
+        if (recv_with_ack(sockfd, recv_buffer, sizeof recv_buffer, servaddr, &servlen) < 0) {
+            printf("timed out");
+            return;
+        }
+        puts(recv_buffer);
+    } else if (!strncmp(message, EXIT, strlen(EXIT))) {
+        exit(0);
+    } else {
+        printf("Invalid command");
+    }
+}
+
 int main(int argc, char *argv[]) { 
     int sockfd; 
     char send_buffer[MAXLINE], recv_buffer[MAXLINE];
@@ -33,23 +55,14 @@ int main(int argc, char *argv[]) {
     while (1) {
         printf("> ");
         fgets(send_buffer, MAXLINE, stdin);
-        n = sendto(sockfd, (const char *) send_buffer, strlen(send_buffer), 0,
+
+        n = sendto(sockfd, (const char *) send_buffer, strlen(send_buffer)+1, 0,
                    (const struct sockaddr *) &servaddr, servlen); 
         if (n < 0) {
             perror("sendto error");
         }
         
-        printf("%d\n", recv_with_ack(sockfd, recv_buffer, MAXLINE));
-
-        // recvfrom()
-        // n = recvfrom(sockfd, recv_buffer, MAXLINE, 0, (
-            
-        // n = recvfrom(sockfd, (char *)recv_buffer, MAXLINE, 0,
-        //              (struct sockaddr *) &servaddr, &servlen); 
-        // if (n < 0) {
-        //     perror("recvfrom error");
-        // }
-        // printf("Server: %s", recv_buffer); 
+        dispatch(send_buffer, sockfd, (struct sockaddr *) &servaddr, servlen);
     }
   
     close(sockfd); 

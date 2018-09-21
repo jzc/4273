@@ -8,8 +8,10 @@
 #include <stdlib.h>
 #include <netinet/in.h> 
 
+#include "defs.h"
+
 int wait_for_socket(int socket) {
-    struct timeval tv = { .tv_sec = 2, .tv_usec = 0 };
+    struct timeval tv = { .tv_sec = TIMEOUT, .tv_usec = 0 };
     fd_set readfds;
 
     FD_ZERO(&readfds);
@@ -36,7 +38,7 @@ int send_with_ack(int socket, const void *message, size_t length,
             perror("recvfrom error");
             exit(EXIT_FAILURE);
         }
-        return 0;
+        return n;
     } 
     // acknoledgement dropped
     else {
@@ -45,27 +47,30 @@ int send_with_ack(int socket, const void *message, size_t length,
     }
 }
 
-int recv_with_ack(int socket, void *restrict buffer, size_t length) {
+int recv_with_ack(int socket, void *restrict buffer, size_t length,
+                  struct sockaddr *fromaddr, socklen_t *fromlen) {
     int n;
-    struct sockaddr_in fromaddr;
-    socklen_t fromlen = sizeof fromaddr;
+    // struct sockaddr_in fromaddr;
+    // socklen_t fromlen = sizeof fromaddr;
 
     // message received
     if (wait_for_socket(socket)) {
-        n = recvfrom(socket, buffer, length, 0, (struct sockaddr *) &fromaddr, &fromlen);
+        n = recvfrom(socket, buffer, length, 0, fromaddr, fromlen);
         if (n < 0) {
             perror("recvfrom error");
             exit(EXIT_FAILURE);
         }
         char ack = 'S';
-        sendto(socket, &ack, sizeof ack, 0, (struct sockaddr *) &fromaddr, fromlen);
-        return 0;
+        int m = sendto(socket, &ack, sizeof ack, 0, fromaddr, *fromlen);
+        if (m < 0) {
+            perror("sendto error");
+            exit(EXIT_FAILURE);
+        }
+        return n;
     }
     // message dropped
     else {
         printf("timeout reached, assuming message dropped\n");
         return -1;
     }
-
-    
 }
