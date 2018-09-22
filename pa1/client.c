@@ -16,7 +16,12 @@
 void dispatch(char *message, int sockfd, struct sockaddr *servaddr, socklen_t servlen) {
     char recv_buffer[MAXLINE];
     if (!strncmp(message, GET, strlen(GET))) {
-    
+        message += strlen(GET) + 1;
+        char* pos;
+        if ((pos = strchr(message, '\n')) != NULL) 
+            *pos = '\0';
+
+        recv_file(message, sockfd, servaddr, servlen);
     } else if (!strncmp(message, PUT, strlen(PUT))) {
 
     } else if (!strncmp(message, DELETE, strlen(DELETE))) {

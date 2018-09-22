@@ -2,3 +2,5 @@ client
 server
 test.c
 a.out
+big.txt
+cli

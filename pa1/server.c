@@ -1,4 +1,4 @@
-#include <stdio.h> 
+ #include <stdio.h> 
 #include <stdlib.h> 
 #include <unistd.h> 
 #include <string.h> 
@@ -39,6 +39,12 @@ void dispatch(char *message, int sockfd, struct sockaddr *cliaddr, socklen_t cli
     char send_buffer[MAXLINE];
     if (!strncmp(message, GET, strlen(GET))) {
         printf("get received\n");
+        message += strlen(GET) + 1;
+        char* pos;
+        if ((pos = strchr(message, '\n')) != NULL) 
+            *pos = '\0';
+
+        send_file(message, sockfd, cliaddr, clilen);
     } else if (!strncmp(message, PUT, strlen(PUT))) {
         printf("put received\n");
     } else if (!strncmp(message, DELETE, strlen(DELETE))) {
