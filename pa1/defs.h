@@ -7,4 +7,4 @@
 #define DELETE "delete"
 #define LS "ls"
 #define EXIT "exit"
-#define TIMEOUT 2
+#define TIMEOUT 5

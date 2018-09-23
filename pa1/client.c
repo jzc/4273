@@ -24,7 +24,12 @@ void dispatch(char *message, int sockfd, struct sockaddr *servaddr, socklen_t se
 
         recv_file(message, sockfd, servaddr, servlen);
     } else if (!strncmp(message, PUT, strlen(PUT))) {
+        message += strlen(PUT) + 1;
+        char* pos;
+        if ((pos = strchr(message, '\n')) != NULL) 
+            *pos = '\0';
 
+        send_file(message, sockfd, servaddr, servlen);
     } else if (!strncmp(message, DELETE, strlen(DELETE))) {
         if (recv_with_ack(sockfd, recv_buffer, sizeof recv_buffer, servaddr, &servlen) < 0) {
             printf("timed out");

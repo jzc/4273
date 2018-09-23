@@ -47,6 +47,12 @@ void dispatch(char *message, int sockfd, struct sockaddr *cliaddr, socklen_t cli
         send_file(message, sockfd, cliaddr, clilen);
     } else if (!strncmp(message, PUT, strlen(PUT))) {
         printf("put received\n");
+        message += strlen(PUT) + 1;
+        char* pos;
+        if ((pos = strchr(message, '\n')) != NULL) 
+            *pos = '\0';
+
+        recv_file(message, sockfd, cliaddr, clilen);
     } else if (!strncmp(message, DELETE, strlen(DELETE))) {
         printf("delete received\n");
         message += strlen(DELETE) + 1;
