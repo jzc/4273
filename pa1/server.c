@@ -71,7 +71,12 @@ void dispatch(char *message, int sockfd, struct sockaddr *cliaddr, socklen_t cli
     }
 }
 
-int main() { 
+int main(int argc, char* argv[]) { 
+    if (argc != 2) {
+        printf("Usage: %s <port>\n", argv[0]);
+        return 0;
+    }
+
     int sockfd; 
     char recv_buffer[MAXLINE]; //, send_buffer[MAXLINE]; 
     struct sockaddr_in servaddr, cliaddr; 
@@ -85,7 +90,7 @@ int main() {
     memset(&cliaddr, 0, sizeof(cliaddr)); 
     servaddr.sin_family = AF_INET; 
     servaddr.sin_addr.s_addr = INADDR_ANY; 
-    servaddr.sin_port = htons(PORT); 
+    servaddr.sin_port = htons(atoi(argv[1])); 
       
     if (bind(sockfd, (const struct sockaddr *)&servaddr, sizeof(servaddr)) < 0 ) 
     { 
