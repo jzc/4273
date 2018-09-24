@@ -1,0 +1,13 @@
+author: Justin Cai
+
+Build with:
+    $ make
+
+The client and server executables are placed into their own seperate folders
+of the same name. 
+
+You can make test files with
+    $ make testfiles
+
+This will make a text and binary file for both the client and server and 
+put them in their respective folders.

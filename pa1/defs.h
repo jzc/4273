@@ -1,3 +1,5 @@
+// author: Justin Cai
+
 #define PORT     8080 
 #define MAXLINE 1024 
 #define PART_SIZE 1024

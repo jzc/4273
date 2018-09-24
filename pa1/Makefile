@@ -1,3 +1,5 @@
+# author: Justin Cai
+
 CC = gcc
 CFLAGS = -c -g -Wall -Wextra
 LFLAGS = -Wall
