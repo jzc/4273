@@ -28,6 +28,7 @@ void handle_request(int client);
 int dns_lookup(std::string host, struct addrinfo **servinfo);
 std::vector<char> get_page(std::string url, std::string host);
 std::vector<char> recv_response(int servsocket);
+void prefetch(std::string url, std::vector<char> response);
 int Socket(int domain, int type, int protocol);
 int Bind(int sockfd, struct sockaddr *my_addr, int addrlen);
 int Listen(int sockfd, int backlog);
@@ -39,6 +40,8 @@ int port = 80;
 int timeout = 60;
 const std::regex expr(R"((\w+) https?:\/\/([\w\d\.]+)(\/\S*) )");
 const std::regex ip_expr(R"(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})");
+const std::regex url_expr("href=\"(\\S+)\"");
+const std::regex http_expr(R"(https?:\/\/([\w\d\.]+)(\/\S*))");
 // Set of blacklisted IP addresses
 std::unordered_set<int> blacklist;
 // Mapping from page URL to page content with 
@@ -124,10 +127,40 @@ void handle_request(int client) {
         // Handle get method
         if (method == "GET") {
             auto response = get_page(url, host);
+            // prefetch(url, response);
+            std::thread t(prefetch, url, response);
+            t.detach();
             send(client, &response[0], response.size(), 0);
         } 
     }
     close(client);
+}
+
+void prefetch(std::string url, std::vector<char> response) {
+    std::string response_string(response.begin(), response.end());
+    if (response_string.find("text/html") == std::string::npos) {
+        return;
+    }
+    std::sregex_iterator url_iter(response_string.begin(), response_string.end(), url_expr);
+    std::sregex_iterator end;
+
+
+    for (auto i = url_iter; i != end; i++) {
+        auto match = *i;
+        auto link = match.str(1);
+        // mailto, relative, http, starts with a slash, hashtag
+        std::smatch url_match;
+        if (std::regex_match(link, url_match, http_expr)) {
+            auto host = url_match.str(1);
+            auto url = url_match.str(2);
+            auto key = host+url;
+            std::cout << "Fetching " << key << std::endl;
+            // std::thread t(get_page, url_match.str(2), url_match.str(1));
+            // t.detach();
+            get_page(url_match.str(2), url_match.str(1));
+        }
+    }
+    
 }
 
 std::vector<char> get_page(std::string url, std::string host) {

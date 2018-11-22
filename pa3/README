@@ -1,0 +1,3 @@
+Run ./webproxy <port> <timeout>.
+
+Add a blacklist with a blacklist.txt file, one IP/hostname per line.
