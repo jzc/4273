@@ -267,7 +267,7 @@ std::vector<char> recv_response(int servsocket) {
     char buf[BUFSIZE];
     std::vector<char> response;
     for (;;) {
-        memset(buf, 0, BUFSIZE);
+        memset(buf, 0, BUFSIZE); 
         n = recv(servsocket, buf, BUFSIZE, 0);
         if (n < 0) {
             if (errno == EWOULDBLOCK) {
